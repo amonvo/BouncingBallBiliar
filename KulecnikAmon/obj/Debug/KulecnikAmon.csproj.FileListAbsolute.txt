@@ -1,0 +1,32 @@
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\bin\Debug\KulecnikAmon.exe.config
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\bin\Debug\KulecnikAmon.exe
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\bin\Debug\KulecnikAmon.pdb
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.csprojResolveAssemblyReference.cache
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.MainForm.resources
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.csproj.GenerateResource.Cache
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.exe
+C:\Users\amonv\OneDrive\Dokumenty\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.pdb
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\bin\Debug\KulecnikAmon.exe.config
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\bin\Debug\KulecnikAmon.exe
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\bin\Debug\KulecnikAmon.pdb
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.csprojResolveAssemblyReference.cache
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.MainForm.resources
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.csproj.GenerateResource.Cache
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.exe
+C:\Users\Petr\Documents\SharpDevelop Projects\KulecnikAmon\KulecnikAmon\obj\Debug\KulecnikAmon.pdb
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\bin\Debug\KulecnikAmon.exe.config
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\bin\Debug\KulecnikAmon.exe
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\bin\Debug\KulecnikAmon.pdb
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.csprojResolveAssemblyReference.cache
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.MainForm.resources
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.csproj.GenerateResource.Cache
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.exe
+C:\Users\amonv\OneDrive\Plocha\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.pdb
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\bin\Debug\KulecnikAmon.exe.config
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\bin\Debug\KulecnikAmon.exe
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\bin\Debug\KulecnikAmon.pdb
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.csprojResolveAssemblyReference.cache
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.MainForm.resources
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.csproj.GenerateResource.Cache
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.exe
+F:\Vojta\ZalohaNotebookuDell\Škola\škola - úkoly\KulecnikAmon\obj\Debug\KulecnikAmon.pdb
