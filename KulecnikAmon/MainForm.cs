@@ -16,118 +16,167 @@ namespace KulecnikAmon
 	/// <summary>
 	/// Description of MainForm.
 	/// </summary>
-	public partial class MainForm : Form
+public partial class MainForm : Form
 	{
-		private int ballWidth = 50;
-		private int ballHeight = 50;
-		public long ballPosX = 0;
-		public long ballPosY = 0;
-		private int moveStepX = 2;
-		private int moveStepY = 2;
-		public  int speed = 1;
-		public Brush bColor = Brushes.Green;
+        private const int BallSize = 50;
+        private const int DefaultMoveStep = 2;
+        private const int MinSpeed = 1;
+        private const int MaxSpeed = 20;
+        private const int DefaultSpeed = 1;
+        private const int DefaultColorIndex = 2;
+        private const int DefaultBallX = 200;
+        private const int DefaultBallY = 150;
+		
+		private int _ballWidth = BallSize;
+		private int _ballHeight = BallSize;
+        private long _ballPosX = DefaultBallX;
+        private long _ballPosY = DefaultBallY;
+		private int _moveStepX = DefaultMoveStep;
+		private int _moveStepY = DefaultMoveStep;
+		private int _speed = DefaultSpeed;
+		private Brush _ballBrush = Brushes.Green;
 	
 		
 		public MainForm()
 		{
 			InitializeComponent();
-			progressBar1.Maximum = 20;
+            progressBar1.Maximum = MaxSpeed;
 			
-			this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+			SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
 			
 			
-			this.UpdateStyles();
-			//
-			// TODO: Add constructor code after the InitializeComponent() call.
-			//
+		UpdateStyles();
+		
+        colorSelect.SelectedIndex = DefaultColorIndex;
+	speedSelect.SelectedIndex = 0;
+	progressBar1.Value = DefaultSpeed;
 		}
-		void PaintCircle (object sender, PaintEventArgs e)
+    private void MainForm_Paint(object sender, PaintEventArgs e)
 		{
 			e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 				
-			e.Graphics.Clear(this.BackColor);
+			e.Graphics.Clear(BackColor);
 			
-			e.Graphics.FillEllipse(this.bColor, ballPosX, ballPosY, ballWidth, ballHeight);
+            e.Graphics.FillEllipse(_ballBrush, _ballPosX, _ballPosY, _ballWidth, _ballHeight);
 			
-			e.Graphics.DrawEllipse(Pens.Black, ballPosX, ballPosY, ballWidth, ballHeight);
+            using (Pen outlinePen = new Pen(Color.Black, 2))
+{
+e.Graphics.DrawEllipse(outlinePen, _ballPosX, _ballPosY, _ballWidth, _ballHeight);
+}
+
+using (SolidBrush highlightBrush = new SolidBrush(Color.FromArgb(80, 255, 255, 255)))
+{
+e.Graphics.FillEllipse(highlightBrush, _ballPosX + 10, _ballPosY + 5, _ballWidth / 3, _ballHeight / 3);
+}
 		}
 
-		void MoveBall(object sender, EventArgs e)
+    private void Timer_Tick(object sender, EventArgs e)
 		{
-			ballPosX += moveStepX*this.speed;
+	_ballPosX += _moveStepX * _speed;
 			
-			if (ballPosX < 0 ||
-			    ballPosX + ballWidth > this.ClientSize.Width) {
-				moveStepX = -moveStepX;
-				this.moveColor();
-			}
-			ballPosY += moveStepY*this.speed;
-			if (ballPosY < 0 ||
-			    ballPosY + ballHeight > this.ClientSize.Height) 
-			{
-				moveStepY = -moveStepY;
-				this.moveColor();
-			}
-			this.Refresh();
+	if (_ballPosX < 0 ||
+	    _ballPosX + _ballWidth > ClientSize.Width) {
+		_moveStepX = -_moveStepX;
+			MoveColor();
 		}
-		
-		void SpeedSelectSelectedIndexChanged(object sender, EventArgs e)
-		{
-			this.speed = int.Parse(speedSelect.Text);
+	_ballPosY += _moveStepY * _speed;
+	if (_ballPosY < 0 ||
+	    _ballPosY + _ballHeight > ClientSize.Height) 
+	{
+		_moveStepY = -_moveStepY;
+			MoveColor();
 		}
+		Invalidate();
+	}
 		
-		void moveColor() 
-		{
-			int actualColor = colorSelect.SelectedIndex;
+    private void SpeedSelect_SelectedIndexChanged(object sender, EventArgs e)
+    {
+	if (int.TryParse(speedSelect.Text, out int parsedSpeed))
+	{
+	if (parsedSpeed >= MinSpeed && parsedSpeed <= MaxSpeed)
+	{
+	_speed = parsedSpeed;
+	progressBar1.Value = parsedSpeed;
+	}
+	}
+    }
+		
+        private void MoveColor() 
+        {
+		int actualColor = colorSelect.SelectedIndex;
 			
-			if (actualColor < colorSelect.Items.Count-1) {
+		if (actualColor < colorSelect.Items.Count - 1) {
 				actualColor++;				
 			} else {
 				actualColor = 0;
 			}	
 			
 			colorSelect.SelectedIndex = actualColor;			
-			this.changeColor(colorSelect.Text);			
+		this.ChangeColor(colorSelect.Text);			
 		}
 		
-		void changeColor(String barva)
-		{
-			switch(barva) {
-				case "modrá":
-					this.bColor = Brushes.Blue;
-					break;
-				case "červená":
-					this.bColor = Brushes.Red;
-					break;
-				case "zelená":
-					this.bColor = Brushes.Green;
-					break;
-				case "žlutá":
-					this.bColor = Brushes.Yellow;
-					break;
-				case "fialová":
-					this.bColor = Brushes.Purple;
-					break;
-				default:
-					this.bColor = Brushes.Green;
-					break;
-			}			
-		}
+    private void ChangeColor(string colorName)
+    {
+	switch (colorName)
+	{
+	case "modrá":
+	_ballBrush = Brushes.Blue;
+	break;
+	case "červená":
+	_ballBrush = Brushes.Red;
+	break;
+	case "zelená":
+	_ballBrush = Brushes.Green;
+	break;
+	case "žlutá":
+	_ballBrush = Brushes.Yellow;
+	break;
+	case "fialová":
+	_ballBrush = Brushes.Purple;
+	break;
+	case "černá":
+	_ballBrush = Brushes.Black;
+	break;
+	case "oranžová":
+	_ballBrush = Brushes.Orange;
+	break;
+	case "hnědá":
+	_ballBrush = Brushes.Brown;
+	break;
+	case "růžová":
+	_ballBrush = Brushes.Pink;
+	break;
+	case "azurová":
+	_ballBrush = Brushes.Cyan;
+	break;
+	default:
+	_ballBrush = Brushes.Green;
+	break;
+	}
+    }
 		
-		void ColorSelectSelectedIndexChanged(object sender, EventArgs e)
-		{
-			this.changeColor(colorSelect.Text);
+    private void ColorSelect_SelectedIndexChanged(object sender, EventArgs e)
+    {
+	ChangeColor(colorSelect.Text);
+	Invalidate();
+    }
+		
+    private void ProgressBar1_Click(object sender, EventArgs e)
+	{			
+		float absoluteMouse = (PointToClient(MousePosition).X - progressBar1.Bounds.X);
+		float calcFactor = progressBar1.Width / (float)progressBar1.Maximum;
+		float relativeMouse = absoluteMouse / calcFactor;
 
-		}
+		int newSpeed = Convert.ToInt32(relativeMouse);
 		
-		void ProgressBar1Click(object sender, EventArgs e)
-		{			
-			float absoluteMouse = (PointToClient(MousePosition).X - progressBar1.Bounds.X);
-            float calcFactor = progressBar1.Width / (float)progressBar1.Maximum;
-            float relativeMouse = absoluteMouse / calcFactor;
-
-            this.speed = progressBar1.Value = Convert.ToInt32(relativeMouse);
-            speedSelect.Text = this.speed.ToString(); 
-		}
+	if (newSpeed < MinSpeed)
+		newSpeed = MinSpeed;
+	if (newSpeed > MaxSpeed)
+		newSpeed = MaxSpeed;
+		
+        _speed = progressBar1.Value = newSpeed;
+		if (newSpeed > 0 && newSpeed <= speedSelect.Items.Count)
+speedSelect.SelectedIndex = newSpeed - 1; 
+	}
 	}
 }
