@@ -1,5 +1,7 @@
 # 🎱 Bouncing Ball Simulator
 
+![Demo](BouncingBallSimulatorBilliar.gif)
+
 A billiard-themed multi-ball physics simulation built with C# and WinForms.
 
 ![.NET Framework](https://img.shields.io/badge/.NET%20Framework-4.x-purple)
