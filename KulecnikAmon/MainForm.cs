@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -180,6 +181,12 @@ namespace KulecnikAmon
             int areaW = ClientSize.Width  > 100 ? ClientSize.Width  : 800;
             int areaH = ClientSize.Height > 100 ? ClientSize.Height : 537;
 
+            // Spawn inside the felt area (felt starts at x=40/y=85, ends at x=areaW-40/y=areaH-40)
+            const int spawnXMin = 58;
+            int spawnXMax = areaW - 58;
+            const int spawnYMin = 103;
+            int spawnYMax = areaH - 58;
+
             for (int i = 0; i < count; i++)
             {
                 int size = _rng.Next(20, 56);
@@ -191,8 +198,8 @@ namespace KulecnikAmon
 
                 _balls.Add(new Ball
                 {
-                    X           = _rng.Next(0, Math.Max(1, areaW - size)),
-                    Y           = _rng.Next(45, Math.Max(46, areaH - size)),
+                    X           = _rng.Next(spawnXMin, Math.Max(spawnXMin + 1, spawnXMax - size)),
+                    Y           = _rng.Next(spawnYMin, Math.Max(spawnYMin + 1, spawnYMax - size)),
                     VelocityX   = vx,
                     VelocityY   = vy,
                     Size        = size,
@@ -205,11 +212,63 @@ namespace KulecnikAmon
         // ?? painting ??????????????????????????????????????????????????????????????
         private void MainForm_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            e.Graphics.Clear(Color.FromArgb(30, 30, 30));
+            Graphics g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.Clear(Color.FromArgb(30, 30, 30));
 
+            int w = ClientSize.Width;
+            int h = ClientSize.Height;
+
+            // 1. Outer wood frame
+            using (SolidBrush woodBrush = new SolidBrush(Color.FromArgb(101, 67, 33)))
+                g.FillRectangle(woodBrush, 0, 45, w, h - 45);
+
+            // 2. Green felt inner play area
+            using (SolidBrush feltBrush = new SolidBrush(Color.FromArgb(0, 120, 0)))
+                g.FillRectangle(feltBrush, 40, 85, w - 80, h - 125);
+
+            // 3. Felt shadow/border (darker green outline)
+            using (Pen feltBorder = new Pen(Color.FromArgb(0, 80, 0), 3))
+                g.DrawRectangle(feltBorder, 40, 85, w - 80, h - 125);
+
+            // 4. Pockets
+            int pr = 18;
+            System.Drawing.Point[] pockets =
+            {
+                new System.Drawing.Point(40,     85),
+                new System.Drawing.Point(w / 2,  85),
+                new System.Drawing.Point(w - 40, 85),
+                new System.Drawing.Point(40,     h - 40),
+                new System.Drawing.Point(w / 2,  h - 40),
+                new System.Drawing.Point(w - 40, h - 40)
+            };
+            using (SolidBrush pocketFill = new SolidBrush(Color.Black))
+            using (Pen pocketOutline = new Pen(Color.FromArgb(60, 60, 60), 2))
+            {
+                foreach (System.Drawing.Point p in pockets)
+                {
+                    g.FillEllipse(pocketFill,    p.X - pr, p.Y - pr, pr * 2, pr * 2);
+                    g.DrawEllipse(pocketOutline, p.X - pr, p.Y - pr, pr * 2, pr * 2);
+                }
+            }
+
+            // 5. Centre dashed line
+            int lineY = 85 + (h - 125) / 2;
+            using (Pen dashPen = new Pen(Color.FromArgb(0, 100, 0), 1))
+            {
+                dashPen.DashStyle = DashStyle.Dash;
+                g.DrawLine(dashPen, 40, lineY, w - 40, lineY);
+            }
+
+            // 6. Centre circle
+            int cx = w / 2;
+            int cy = 85 + (h - 125) / 2;
+            using (Pen circlePen = new Pen(Color.FromArgb(0, 100, 0), 1))
+                g.DrawEllipse(circlePen, cx - 40, cy - 40, 80, 80);
+
+            // Balls on top of the table
             foreach (Ball ball in _balls)
-                DrawBall(e.Graphics, ball);
+                DrawBall(g, ball);
         }
 
         private void DrawBall(Graphics g, Ball ball)
@@ -239,28 +298,29 @@ namespace KulecnikAmon
                 ball.X += ball.VelocityX * _speed * 0.25;
                 ball.Y += ball.VelocityY * _speed * 0.25;
 
-                if (ball.X < 0)
+                // Bounce off felt edges (wood frame is 40px; felt top edge at y=85, bottom at h-40)
+                if (ball.X < 40)
                 {
-                    ball.X         = 0;
+                    ball.X         = 40;
                     ball.VelocityX = -ball.VelocityX;
                     ball.BounceCount++;
                 }
-                else if (ball.X + ball.Size > ClientSize.Width)
+                else if (ball.X + ball.Size > ClientSize.Width - 40)
                 {
-                    ball.X         = ClientSize.Width - ball.Size;
+                    ball.X         = ClientSize.Width - 40 - ball.Size;
                     ball.VelocityX = -ball.VelocityX;
                     ball.BounceCount++;
                 }
 
-                if (ball.Y < 45)
+                if (ball.Y < 85)
                 {
-                    ball.Y         = 45;
+                    ball.Y         = 85;
                     ball.VelocityY = -ball.VelocityY;
                     ball.BounceCount++;
                 }
-                else if (ball.Y + ball.Size > ClientSize.Height)
+                else if (ball.Y + ball.Size > ClientSize.Height - 40)
                 {
-                    ball.Y         = ClientSize.Height - ball.Size;
+                    ball.Y         = ClientSize.Height - 40 - ball.Size;
                     ball.VelocityY = -ball.VelocityY;
                     ball.BounceCount++;
                 }
