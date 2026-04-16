@@ -32,6 +32,9 @@ namespace KulecnikAmon
         /// <summary>Number of times this ball has bounced off a wall.</summary>
         public int BounceCount { get; set; }
 
+        /// <summary>Display number shown on the ball (1-based index).</summary>
+        public int Number { get; set; }
+
         /// <summary>Convenience: radius = Size / 2.0</summary>
         public double Radius { get { return Size / 2.0; } }
 
