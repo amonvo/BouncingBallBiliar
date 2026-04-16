@@ -48,7 +48,6 @@ namespace KulecnikAmon
         private bool       _aiming   = false;
         private Point      _mousePos = Point.Empty;
 
-        // ?? toolbar controls ???????????????????????????????????????????????????????
         private Label    lblSpeed;
         private TrackBar speedTrackBar;
         private Label    lblSpeedVal;
@@ -348,13 +347,21 @@ namespace KulecnikAmon
                     (float)_mousePos.X, (float)_mousePos.Y,
                     (float)stickEndX,   (float)stickEndY);
 
-            // Trajectory hint: thin dotted white line in shot direction, 120 px
+            // Trajectory: dotted white line (200 px) + 5 fading guide dots
             using (Pen trajPen = new Pen(Color.FromArgb(200, 255, 255, 255), 1))
             {
                 trajPen.DashStyle = DashStyle.Dot;
                 g.DrawLine(trajPen,
                     (float)cueCX, (float)cueCY,
-                    (float)(cueCX + nx * 120), (float)(cueCY + ny * 120));
+                    (float)(cueCX + nx * 200), (float)(cueCY + ny * 200));
+            }
+            for (int d = 1; d <= 5; d++)
+            {
+                int alpha = Math.Max(0, 255 - d * 45);
+                float dotX = (float)(cueCX + nx * d * 35) - 2f;
+                float dotY = (float)(cueCY + ny * d * 35) - 2f;
+                using (SolidBrush dotBrush = new SolidBrush(Color.FromArgb(alpha, 255, 255, 255)))
+                    g.FillEllipse(dotBrush, dotX, dotY, 4f, 4f);
             }
 
             // Power indicator bar near mouse cursor (matches shot power: clamp(dist,50,300)/30)
@@ -374,10 +381,18 @@ namespace KulecnikAmon
             using (SolidBrush barBrush = new SolidBrush(barColor))
                 g.FillRectangle(barBrush, indX + 1, indY + 1, barW, 12);
 
-            // Power label
+            // Power label (bar number)
             using (Font powerFont = new Font("Arial", 9f, FontStyle.Bold, GraphicsUnit.Pixel))
             using (SolidBrush textBrush = new SolidBrush(Color.White))
                 g.DrawString(((int)power).ToString(), powerFont, textBrush, indX + 64, indY);
+
+            // "Power: X" text beneath cursor (1–10 scale)
+            int powerVal = (int)Math.Min(10.0, Math.Max(1.0, dist / 30.0));
+            using (Font powerTextFont = new Font("Arial", 9f, FontStyle.Regular, GraphicsUnit.Point))
+            using (SolidBrush powerTextBrush = new SolidBrush(Color.White))
+                g.DrawString("Power: " + powerVal.ToString(),
+                             powerTextFont, powerTextBrush,
+                             (float)(_mousePos.X + 15), (float)(_mousePos.Y + 5));
         }
 
         // ?? timer tick ?????????????????????????????????????????????????????????????
