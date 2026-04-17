@@ -1,7 +1,7 @@
 /*
- * Vytvoøeno aplikací SharpDevelop.
- * Uživatel: amonv
- * Datum: 11.11.2022
+ * Created with SharpDevelop.
+ * User: amonv
+ * Date: 11.11.2022
  */
 using System;
 using System.Collections.Generic;
@@ -15,10 +15,10 @@ namespace KulecnikAmon
 {
     public class MainForm : Form
     {
-        // ?? constants ?????????????????????????????????????????????????????????????
+        // -- constants ------------------------------------------------------------
         private const int MinSpeed = 1;
         private const int MaxSpeed = 20;
-        private const int BallDia  = 28;
+        private const int BallDia  = 28;  // diameter of every ball in pixels
 
         private static readonly Color[] BallColors =
         {
@@ -28,7 +28,7 @@ namespace KulecnikAmon
             Color.MediumPurple, Color.DarkOrange,   Color.DarkGreen, Color.Brown
         };
 
-        // ?? infrastructure ????????????????????????????????????????????????????????
+        // -- infrastructure -------------------------------------------------------
         private IContainer components = null;
         private Timer      timer1;
 
@@ -39,15 +39,16 @@ namespace KulecnikAmon
             base.Dispose(disposing);
         }
 
-        // ?? simulation fields ??????????????????????????????????????????????????????
+        // -- simulation fields ----------------------------------------------------
         private List<Ball> _balls    = new List<Ball>();
-        private int        _speed    = 5;
+        private int        _speed    = 5;     // current value of the speed slider
         private bool       _paused   = false;
         private Random     _rng      = new Random();
-        private Ball       _cueBall  = null;
-        private bool       _aiming   = false;
+        private Ball       _cueBall  = null;  // reference to the white cue ball
+        private bool       _aiming   = false; // true while the player is aiming
         private Point      _mousePos = Point.Empty;
 
+        // -- toolbar controls -----------------------------------------------------
         private Label    lblSpeed;
         private TrackBar speedTrackBar;
         private Label    lblSpeedVal;
@@ -55,21 +56,21 @@ namespace KulecnikAmon
         private Button   resetButton;
         private Label    totalBouncesLabel;
 
-        // ?? felt geometry helpers ?????????????????????????????????????????????????
+        // -- felt geometry helpers ------------------------------------------------
         private int FeltLeft    { get { return 40; } }
         private int FeltRight   { get { return ClientSize.Width  - 40; } }
         private int FeltTop     { get { return 85; } }
         private int FeltBottom  { get { return ClientSize.Height - 40; } }
         private int FeltCenterY { get { return (FeltTop + FeltBottom) / 2; } }
 
-        // ?? constructor ????????????????????????????????????????????????????????????
+        // -- constructor ----------------------------------------------------------
         public MainForm()
         {
             components = new Container();
 
-            // Timer
+            // Simulation timer -- interval matches default slider value 5: max(5, 30-5)
             timer1          = new Timer(components);
-            timer1.Interval = 25;   // matches default speedTrackBar.Value=5: max(5, 30-5)
+            timer1.Interval = 25;
             timer1.Tick    += Timer_Tick;
             timer1.Enabled  = true;
 
@@ -90,14 +91,14 @@ namespace KulecnikAmon
                 ControlStyles.UserPaint, true);
             UpdateStyles();
 
-            // ?? Speed label ???????????????????????????????????????????????????????
+            // Speed label
             lblSpeed           = new Label();
             lblSpeed.Text      = "Speed:";
             lblSpeed.ForeColor = Color.White;
             lblSpeed.Location  = new System.Drawing.Point(10, 12);
             lblSpeed.AutoSize  = true;
 
-            // ?? Speed trackbar ????????????????????????????????????????????????????
+            // Speed slider -- changes timer interval (1 = slow, 20 = fast)
             speedTrackBar               = new TrackBar();
             speedTrackBar.Minimum       = MinSpeed;
             speedTrackBar.Maximum       = MaxSpeed;
@@ -108,14 +109,14 @@ namespace KulecnikAmon
             speedTrackBar.TickFrequency = 5;
             speedTrackBar.ValueChanged += SpeedTrackBar_ValueChanged;
 
-            // ?? Speed value label ?????????????????????????????????????????????????
+            // Current speed value display
             lblSpeedVal           = new Label();
             lblSpeedVal.Text      = "5";
             lblSpeedVal.ForeColor = Color.White;
             lblSpeedVal.Width     = 25;
             lblSpeedVal.Location  = new System.Drawing.Point(250, 12);
 
-            // ?? Pause button ??????????????????????????????????????????????????????
+            // Pause / resume button
             pauseButton           = new Button();
             pauseButton.Text      = "\u23F8 Pause";
             pauseButton.Width     = 90;
@@ -126,7 +127,7 @@ namespace KulecnikAmon
             pauseButton.ForeColor = Color.White;
             pauseButton.Click    += PauseButton_Click;
 
-            // ?? Reset button ??????????????????????????????????????????????????????
+            // Reset button -- returns all balls to the triangle rack formation
             resetButton           = new Button();
             resetButton.Text      = "\u21BA Reset";
             resetButton.Width     = 80;
@@ -137,7 +138,7 @@ namespace KulecnikAmon
             resetButton.ForeColor = Color.White;
             resetButton.Click    += ResetButton_Click;
 
-            // ?? Total bounces label ???????????????????????????????????????????????
+            // Wall-bounce counter label
             totalBouncesLabel           = new Label();
             totalBouncesLabel.Text      = "Bounces: 0";
             totalBouncesLabel.ForeColor = Color.White;
@@ -155,16 +156,16 @@ namespace KulecnikAmon
             InitializeBalls();
         }
 
-        // ?? ball initialisation ????????????????????????????????????????????????????
+        // -- ball initialisation --------------------------------------------------
         private void InitializeBalls()
         {
             _balls.Clear();
             _aiming = false;
 
-            int ballR  = BallDia / 2;
-            int feltW  = FeltRight - FeltLeft;   // 954 px at default size
+            int ballR = BallDia / 2;
+            int feltW = FeltRight - FeltLeft;   // ~954 px at the default window width
 
-            // ?? Cue ball: 1/4 felt width from felt left edge ??????????????????????
+            // Cue ball: 1/4 of felt width from the left edge, vertically centred
             int cueCX = FeltLeft + feltW / 4;
             _cueBall = new Ball
             {
@@ -179,19 +180,19 @@ namespace KulecnikAmon
             };
             _balls.Add(_cueBall);
 
-            // ?? Triangle rack: tip at 3/4 felt width ??????????????????????????????
-            // Equilateral triangle packing:
-            //   horizontal step per row : sqrt(3)/2 * (dia+1) ? 25 px
-            //   vertical spacing in row : dia + 1 = 29 px
-            int    dy   = BallDia + 1;                            // 29
-            double dxD  = dy * Math.Sqrt(3.0) / 2.0;             // ? 25.1
-            int    dx   = (int)Math.Round(dxD);                   // 25
+            // Triangle rack: tip at 3/4 of felt width
+            // Equilateral close-packing layout:
+            //   horizontal step between rows : sqrt(3)/2 * (dia+1) ~= 25 px
+            //   vertical spacing within row  : dia + 1 = 29 px
+            int    dy  = BallDia + 1;                            // 29
+            double dxD = dy * Math.Sqrt(3.0) / 2.0;             // ~= 25.1
+            int    dx  = (int)Math.Round(dxD);                   // 25
 
             int rackTipCX = FeltLeft + feltW * 3 / 4;
             int rackTipCY = FeltCenterY;
 
             int ballNum = 1;
-            int[] rowCounts = { 1, 2, 3, 4, 5 };
+            int[] rowCounts = { 1, 2, 3, 4, 5 };  // 1+2+3+4+5 = 15 coloured balls
 
             for (int row = 0; row < rowCounts.Length; row++)
             {
@@ -200,7 +201,7 @@ namespace KulecnikAmon
 
                 for (int col = 0; col < count; col++)
                 {
-                    // Vertically centre the row, then distribute cols evenly
+                    // Row is vertically centred; balls are evenly distributed within it
                     double rowCY = rackTipCY + (col - (count - 1) / 2.0) * dy;
 
                     _balls.Add(new Ball
@@ -219,23 +220,23 @@ namespace KulecnikAmon
             }
         }
 
-        // ?? pocket positions ??????????????????????????????????????????????????????
+        // -- pocket positions -----------------------------------------------------
         private System.Drawing.Point[] GetPocketPositions()
         {
             int w = ClientSize.Width;
             int h = ClientSize.Height;
             return new[]
             {
-                new System.Drawing.Point(40,     85),
-                new System.Drawing.Point(w / 2,  85),
-                new System.Drawing.Point(w - 40, 85),
-                new System.Drawing.Point(40,     h - 40),
-                new System.Drawing.Point(w / 2,  h - 40),
-                new System.Drawing.Point(w - 40, h - 40)
+                new System.Drawing.Point(40,     85),        // top-left corner
+                new System.Drawing.Point(w / 2,  85),        // top-middle
+                new System.Drawing.Point(w - 40, 85),        // top-right corner
+                new System.Drawing.Point(40,     h - 40),    // bottom-left corner
+                new System.Drawing.Point(w / 2,  h - 40),   // bottom-middle
+                new System.Drawing.Point(w - 40, h - 40)    // bottom-right corner
             };
         }
 
-        // ?? painting ??????????????????????????????????????????????????????????????
+        // -- painting -------------------------------------------------------------
         private void MainForm_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
@@ -249,15 +250,15 @@ namespace KulecnikAmon
             using (SolidBrush woodBrush = new SolidBrush(Color.FromArgb(101, 67, 33)))
                 g.FillRectangle(woodBrush, 0, 45, w, h - 45);
 
-            // 2. Green felt inner play area
+            // 2. Green felt (play area)
             using (SolidBrush feltBrush = new SolidBrush(Color.FromArgb(0, 120, 0)))
                 g.FillRectangle(feltBrush, 40, 85, w - 80, h - 125);
 
-            // 3. Felt shadow/border (darker green outline)
+            // 3. Darker green felt border
             using (Pen feltBorder = new Pen(Color.FromArgb(0, 80, 0), 3))
                 g.DrawRectangle(feltBorder, 40, 85, w - 80, h - 125);
 
-            // 4. Pockets
+            // 4. Six pockets (4 corner + 2 side-centre)
             int pr = 18;
             foreach (System.Drawing.Point p in GetPocketPositions())
             {
@@ -281,11 +282,11 @@ namespace KulecnikAmon
             using (Pen circlePen = new Pen(Color.FromArgb(0, 100, 0), 1))
                 g.DrawEllipse(circlePen, cx - 40, cy - 40, 80, 80);
 
-            // Balls
+            // Draw all balls
             foreach (Ball ball in _balls)
                 DrawBall(g, ball);
 
-            // Cue stick overlay (drawn on top of everything)
+            // Cue stick is drawn on top, only while the player is aiming
             if (_aiming && _cueBall != null)
                 DrawCueStick(g);
         }
@@ -305,10 +306,10 @@ namespace KulecnikAmon
             using (SolidBrush highlight = new SolidBrush(Color.FromArgb(80, 255, 255, 255)))
                 g.FillEllipse(highlight, x + 8f, y + 5f, size / 3f, size / 3f);
 
-            // No number on cue ball (Number == 0)
+            // Cue ball (Number == 0) carries no number
             if (ball.Number == 0) return;
 
-            // Use dark text on light-coloured balls for contrast
+            // Use dark text on light-coloured balls, white text on dark ones
             bool useDark = ball.BallColor == Color.Yellow  || ball.BallColor == Color.Gold
                         || ball.BallColor == Color.White   || ball.BallColor == Color.Cyan
                         || ball.BallColor == Color.Lime;
@@ -335,11 +336,11 @@ namespace KulecnikAmon
             double dist  = Math.Sqrt(dx * dx + dy * dy);
             if (dist < 1) return;
 
-            // Normalised direction: mouse ? ball (= shot direction)
+            // Normalised direction: mouse -> ball (= shot direction)
             double nx = dx / dist;
             double ny = dy / dist;
 
-            // Cue stick: thick wood-coloured line from mouse to 80 px past ball centre
+            // Cue stick: thick wood-coloured line from mouse to 80 px past the ball centre
             double stickEndX = cueCX + nx * 80;
             double stickEndY = cueCY + ny * 80;
             using (Pen cuePen = new Pen(Color.FromArgb(180, 120, 40), 6))
@@ -347,7 +348,7 @@ namespace KulecnikAmon
                     (float)_mousePos.X, (float)_mousePos.Y,
                     (float)stickEndX,   (float)stickEndY);
 
-            // Trajectory: dotted white line (200 px) + 5 fading guide dots
+            // Dotted trajectory line (200 px) + 5 fading guide dots
             using (Pen trajPen = new Pen(Color.FromArgb(200, 255, 255, 255), 1))
             {
                 trajPen.DashStyle = DashStyle.Dot;
@@ -364,7 +365,7 @@ namespace KulecnikAmon
                     g.FillEllipse(dotBrush, dotX, dotY, 4f, 4f);
             }
 
-            // Power indicator bar near mouse cursor (matches shot power: clamp(dist,50,300)/30)
+            // Power indicator near cursor (formula: clamp(dist, 50, 300) / 30)
             double power = Math.Min(300.0, Math.Max(50.0, dist)) / 30.0;
             int    barW  = (int)((Math.Min(dist, 300.0) - 50.0) / 250.0 * 60.0);
             if (barW < 0) barW = 0;
@@ -374,19 +375,19 @@ namespace KulecnikAmon
             using (SolidBrush bgBrush = new SolidBrush(Color.FromArgb(160, 0, 0, 0)))
                 g.FillRectangle(bgBrush, indX, indY, 62, 14);
 
-            // Bar colour: green ? red with increasing power
+            // Bar colour: green -> red with increasing power
             Color barColor = Color.FromArgb(220,
                 (int)(255 * power / 15.0),
                 (int)(255 * (1.0 - power / 15.0)), 0);
             using (SolidBrush barBrush = new SolidBrush(barColor))
                 g.FillRectangle(barBrush, indX + 1, indY + 1, barW, 12);
 
-            // Power label (bar number)
+            // Numeric power value beside the bar
             using (Font powerFont = new Font("Arial", 9f, FontStyle.Bold, GraphicsUnit.Pixel))
             using (SolidBrush textBrush = new SolidBrush(Color.White))
                 g.DrawString(((int)power).ToString(), powerFont, textBrush, indX + 64, indY);
 
-            // "Power: X" text beneath cursor (1–10 scale)
+            // "Power: X" text near cursor (scale 1-10)
             int powerVal = (int)Math.Min(10.0, Math.Max(1.0, dist / 30.0));
             using (Font powerTextFont = new Font("Arial", 9f, FontStyle.Regular, GraphicsUnit.Point))
             using (SolidBrush powerTextBrush = new SolidBrush(Color.White))
@@ -395,9 +396,11 @@ namespace KulecnikAmon
                              (float)(_mousePos.X + 15), (float)(_mousePos.Y + 5));
         }
 
-        // ?? timer tick ?????????????????????????????????????????????????????????????
+        // -- physics helpers ------------------------------------------------------
         private static void EnforceMinVelocity(Ball ball)
         {
+            // If a ball received a very small velocity after a collision, scale it up to
+            // the minimum (1.5 px/tick) to prevent stalling due to floating-point residue.
             const double minMag = 1.5;
             double mag = Math.Sqrt(ball.VelocityX * ball.VelocityX +
                                    ball.VelocityY * ball.VelocityY);
@@ -409,11 +412,12 @@ namespace KulecnikAmon
             }
         }
 
+        // -- timer tick (simulation loop) -----------------------------------------
         private void Timer_Tick(object sender, EventArgs e)
         {
             if (_paused) return;
 
-            // Move every ball and handle wall bounces (no friction — energy is conserved).
+            // Move every ball and handle wall bounces (no friction -- energy is conserved).
             foreach (Ball ball in _balls)
             {
                 ball.X += ball.VelocityX;
@@ -447,7 +451,7 @@ namespace KulecnikAmon
                 }
             }
 
-            // Ball-to-ball collision — proper equal-mass elastic resolution
+            // Ball-to-ball collisions -- proper equal-mass elastic resolution
             for (int i = 0; i < _balls.Count; i++)
             {
                 for (int j = i + 1; j < _balls.Count; j++)
@@ -464,32 +468,32 @@ namespace KulecnikAmon
 
                     if (distance < minDist && distance > 0.0001)
                     {
-                        // Normalize collision axis
+                        // Normalised collision axis (from centre i toward centre j)
                         double nx = dx / distance;
                         double ny = dy / distance;
 
-                        // Separate overlapping balls
+                        // Separate overlapping balls (each moves half the overlap distance)
                         double overlap = (minDist - distance) / 2.0;
                         _balls[i].X -= nx * overlap;
                         _balls[i].Y -= ny * overlap;
                         _balls[j].X += nx * overlap;
                         _balls[j].Y += ny * overlap;
 
-                        // Relative velocity along collision normal (i relative to j)
+                        // Relative velocity of i with respect to j, projected onto collision axis
                         double dvx = _balls[i].VelocityX - _balls[j].VelocityX;
                         double dvy = _balls[i].VelocityY - _balls[j].VelocityY;
                         double dot = dvx * nx + dvy * ny;
 
-                        // Only resolve if balls are approaching
+                        // Only resolve if balls are approaching (dot > 0)
                         if (dot <= 0) continue;
 
-                        // Exchange velocity components along normal (equal mass elastic)
+                        // Exchange velocity components along the collision axis (elastic collision)
                         _balls[i].VelocityX -= dot * nx;
                         _balls[i].VelocityY -= dot * ny;
                         _balls[j].VelocityX += dot * nx;
                         _balls[j].VelocityY += dot * ny;
 
-                        // Ensure any ball that received velocity doesn't stall below minimum
+                        // Ensure neither ball drops below minimum speed after the collision
                         EnforceMinVelocity(_balls[i]);
                         EnforceMinVelocity(_balls[j]);
                     }
@@ -500,7 +504,7 @@ namespace KulecnikAmon
             Invalidate();
         }
 
-        // ?? mouse handlers ?????????????????????????????????????????????????????????
+        // -- mouse handlers -------------------------------------------------------
         private void MainForm_MouseMove(object sender, MouseEventArgs e)
         {
             if (_aiming)
@@ -519,6 +523,7 @@ namespace KulecnikAmon
             double dx    = e.X - cueCX;
             double dy    = e.Y - cueCY;
 
+            // Start aiming if the click lands within 60 px of the cue ball centre
             if (Math.Sqrt(dx * dx + dy * dy) < 60)
             {
                 _aiming   = true;
@@ -533,12 +538,13 @@ namespace KulecnikAmon
 
             double cueCX = _cueBall.X + _cueBall.Size / 2.0;
             double cueCY = _cueBall.Y + _cueBall.Size / 2.0;
-            double dx    = cueCX - _mousePos.X;   // direction: mouse ? ball = shot direction
+            double dx    = cueCX - _mousePos.X;   // direction: mouse -> ball = shot direction
             double dy    = cueCY - _mousePos.Y;
             double dist  = Math.Sqrt(dx * dx + dy * dy);
 
             if (dist > 0)
             {
+                // Shot power: mouse distance clamped to [50, 300] divided by 30 -> velocity 1.67-10 px/tick
                 double power       = Math.Min(300.0, Math.Max(50.0, dist)) / 30.0;
                 _cueBall.VelocityX = (dx / dist) * power;
                 _cueBall.VelocityY = (dy / dist) * power;
@@ -548,17 +554,17 @@ namespace KulecnikAmon
             Invalidate();
         }
 
-        // ?? toolbar event handlers ?????????????????????????????????????????????????
+        // -- toolbar event handlers -----------------------------------------------
         private void SpeedTrackBar_ValueChanged(object sender, EventArgs e)
         {
             _speed           = speedTrackBar.Value;
             lblSpeedVal.Text = _speed.ToString();
-            timer1.Interval  = Math.Max(5, 30 - speedTrackBar.Value);
+            timer1.Interval  = Math.Max(5, 30 - speedTrackBar.Value); // higher value = shorter interval = faster
         }
 
         private void BallTrackBar_ValueChanged(object sender, EventArgs e)
         {
-            // Ball count is fixed in billiard mode; handler kept for wiring compatibility.
+            // Ball count is fixed at 16 (1 cue ball + 15 coloured); handler intentionally empty.
         }
 
         private void PauseButton_Click(object sender, EventArgs e)
